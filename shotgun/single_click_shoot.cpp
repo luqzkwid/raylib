@@ -9,55 +9,76 @@ typedef struct {
 } Player;
 typedef struct {
   Vector2 position, size;
+  float aov; // angle of vision 
 } Gun;
-
 typedef struct {
   Vector2 position,velocity;
   float radius; bool active;
 } Bullet;
-
+// Globals
+Vector2 p_pos={200,200}, p_vel={5,5};
+// Functions Definitions
 std::vector<Bullet> BulletList;
 void shoot(Gun* gun);
 void UpdateAmmo();
-void DrawGun(Gun* gun, Player* px);
-void AddMovement(Player* px);
-// globals
-Vector2 p_pos={200,200}, p_vel={5,5};
+void Draw(Gun* gun, Player* px);
+void AddMovement(Player* px, Gun* gun);
+
 int main(void){
   raylib::Window window(WIDTH, HEIGHT, "Shotgun Game");
   Player p = {p_pos, p_vel, 20}; // position, velocity, radius
-  Gun gun  = {{p_pos.x+10, p_pos.y}, {30, 10}};
+  Gun gun  = {{p_pos.x+10, p_pos.y}, {50, 5}, 0.0f};
   SetTargetFPS(60);
   while(!window.ShouldClose()){
     BeginDrawing();
     window.ClearBackground(BLACK);
-    DrawGun(&gun, &p); 
+    Draw(&gun, &p); 
       shoot(&gun);
-      AddMovement(&p);
+      AddMovement(&p, &gun);
       UpdateAmmo();
       
-    EndDrawing();
-    
+    EndDrawing();    
   }
 }
-void AddMovement(Player* px) {
-  if(IsKeyDown(KEY_UP))      {p_pos.y -= p_vel.y;}
-  if(IsKeyDown(KEY_DOWN))    {p_pos.y += p_vel.y;}
-  if(IsKeyDown(KEY_RIGHT))   {p_pos.x += p_vel.x;}
-  if(IsKeyDown(KEY_LEFT))    {p_pos.x -= p_vel.x;}
+void AddMovement(Player* px, Gun* gun) {
+  if(IsKeyDown(KEY_UP)){
+    p_pos.y -= p_vel.y;
+    gun->aov = -90;
+  }
+  if(IsKeyDown(KEY_DOWN)){
+    p_pos.y += p_vel.y;
+    gun->aov = 90;
+  }
+  if(IsKeyDown(KEY_RIGHT)){
+    p_pos.x += p_vel.x;
+    gun->aov = 0.0f;
+  }
+  if(IsKeyDown(KEY_LEFT)){
+    p_pos.x -= p_vel.x;
+    gun->aov = 180.0f;
+  }
 }
-void DrawGun(Gun* gun, Player* pX) {
+void Draw(Gun* gun, Player* pX) {
+  raylib::Rectangle Gun_template(p_pos.x, p_pos.y, gun->size.x, gun->size.y);
+  Vector2 CenterOfOrigin = {0, Gun_template.height/2};
   DrawCircleV(p_pos, pX->radius, BLUE);
-  DrawRectangleV(p_pos, gun->size, RED);
+  DrawRectanglePro(Gun_template, CenterOfOrigin, gun->aov,  BLUE);
 }
 void shoot(Gun* gun) {
   if(IsKeyPressed(KEY_SPACE)) {
     Bullet newBullet;
-    newBullet.position = {
-      p_pos.x + gun->size.x,
-      p_pos.y + gun->size.y/2
-    };
-    newBullet.velocity = {10,0};
+    float radians = gun->aov * (PI / 180.0f);
+    float bulletSpeed = 10.0f;
+    float gunLength = gun->size.x;
+    
+    // 2. Calculate spawn position at the tip of the barrel
+    // We start at p_pos and move 'gunLength' distance in the gun's direction
+    newBullet.position.x = p_pos.x + cosf(radians) * gunLength;
+    newBullet.position.y = p_pos.y + sinf(radians) * gunLength;
+    
+    // 3. Calculate velocity based on angle
+    newBullet.velocity.x = cosf(radians) * bulletSpeed;
+    newBullet.velocity.y = sinf(radians) * bulletSpeed;
     newBullet.radius   = 5;
     newBullet.active   = true;
     
