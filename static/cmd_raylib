@@ -1,0 +1,2 @@
+	g++ -o xxx xxxxx.cpp -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+	
