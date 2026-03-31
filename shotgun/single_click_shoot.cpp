@@ -6,7 +6,7 @@
 
 #define WIDTH 600
 #define HEIGHT 400
-#define NUMBER_OF_ENEMIES 20
+#define NUMBER_OF_ENEMIES 60
 
 typedef struct {
   Vector2 position, velocity;
@@ -22,7 +22,7 @@ typedef struct {
 } Bullet;
 typedef struct {
   Vector2 position,velocity;
-  float radius; int health;
+  float radius; bool active;
 } Enemy;
 // Globals
 Vector2 p_pos={200,200}, p_vel={5,5};
@@ -68,7 +68,7 @@ void AddEnemies(){
     enemy_above.velocity.x = (float)distrib_velocity_x_above(gen);
     enemy_above.velocity.y = (float)distrib_velocity_y_above(gen);
     enemy_above.radius     = 10;
-    enemy_above.health     = 100;
+    enemy_above.active     = true;
 
     EnemiesList.push_back(enemy_above);
   }
@@ -98,12 +98,9 @@ void shoot(Gun* gun) {
     float bulletSpeed = 10.0f;
     float gunLength = gun->size.x;
     
-    // 2. Calculate spawn position at the tip of the barrel
-    // We start at p_pos and move 'gunLength' distance in the gun's direction
     newBullet.position.x = p_pos.x + cosf(radians) * gunLength;
     newBullet.position.y = p_pos.y + sinf(radians) * gunLength;
    
-    // 3. Calculate velocity based on angle
     newBullet.velocity.x = cosf(radians) * bulletSpeed;
     newBullet.velocity.y = sinf(radians) * bulletSpeed;
     newBullet.radius   = 5;
@@ -112,43 +109,57 @@ void shoot(Gun* gun) {
     BulletList.push_back(newBullet);
   }
 }
-void Update() {
-  // Loop into enemies vector and if the Ammo colides with the enemy surface, then we stop drawing enemy
-  bool colide_with_bullet = false;
-  for(int i=0; i<EnemiesList.size(); i++){
-    for(int j=0; j< BulletList.size(); j++){
-      float dx = EnemiesList.at(i).position.x - BulletList.at(j).position.x;
-      float dy = EnemiesList.at(i).position.y - BulletList.at(j).position.y;
-      float radius_sum = EnemiesList.at(i).radius + BulletList.at(j).radius;
 
-      if(dx*dx + dy*dy <= radius_sum * radius_sum) {
-	colide_with_bullet = true;
-	BulletList.at(j).active = false;
+void Update() {
+
+  for(int j = 0; j < BulletList.size(); j++) {
+    auto& bullet = BulletList[j];
+    if(!bullet.active) continue;
+    
+    bullet.position.x += bullet.velocity.x;
+    bullet.position.y += bullet.velocity.y;
+    
+    DrawCircleV(bullet.position, bullet.radius, GREEN);
+
+    if(bullet.position.x > WIDTH || bullet.position.x < 0 ||
+       bullet.position.y > HEIGHT || bullet.position.y < 0) {
+      bullet.active = false;
+    }
+  }
+
+  for(int i = 0; i < EnemiesList.size(); i++) {
+    auto& enemy = EnemiesList[i];
+    
+    if(!enemy.active) continue; 
+
+    enemy.position.y += enemy.velocity.y;
+    enemy.position.x += enemy.velocity.x;
+
+   
+    if (enemy.position.y > HEIGHT) {
+        enemy.position.y = -enemy.radius;
+    }
+    for(int o = 0; o < BulletList.size(); o++) {
+      auto& bullet = BulletList[o]; 
+      
+      if(!bullet.active) continue;
+
+      float dx = enemy.position.x - bullet.position.x;
+      float dy = enemy.position.y - bullet.position.y;
+      float radius_sum = enemy.radius + bullet.radius;
+      
+      if((dx * dx) + (dy * dy) <= (radius_sum * radius_sum)) {
+        enemy.active = false;  
+        bullet.active = false;
+        break;
       }
-      if (BulletList.at(j).active) {
-	DrawCircleV(BulletList.at(j).position, BulletList.at(j).radius, GREEN );
-	BulletList.at(j).position.x += BulletList.at(j).velocity.x;
-	BulletList.at(j).position.y += BulletList.at(j).velocity.y;
-      }
-      if(BulletList.at(j).position.x > GetScreenWidth() ||
-	 BulletList.at(j).position.y > GetScreenHeight()) {
-	BulletList.at(j).active = false;
-      }
-    } // Here ends the bullet for loop
-    if (EnemiesList.at(i).position.y + EnemiesList.at(i).radius > HEIGHT ||
-	EnemiesList.at(i).position.x + EnemiesList.at(i).radius > WIDTH) {EnemiesList.at(i).position.y = 0;}
-    if (!colide_with_bullet) {												 
-      DrawCircleV(EnemiesList.at(i).position, EnemiesList.at(i).radius, YELLOW);				 
-      EnemiesList.at(i).position.y += EnemiesList.at(i).velocity.y * 0.9;					 
-      std::cout << "Enemy: " << i << "\n";								 
-      std::cout << "X: " << EnemiesList.at(i).position.x << "\n";						 
-      std::cout << "Y: " << EnemiesList.at(i).position.y << "\n";						 
-    } else {
-      DrawCircleV(EnemiesList.at(i).position, EnemiesList.at(i).radius, RED);
-      continue;
+    }
+    if(enemy.active) {
+      DrawCircleV(enemy.position, enemy.radius, YELLOW);
     }
   }
 }
+
 /* 
   for(int i=0; i < BulletList.size(); i++) {
     if (BulletList.at(i).active) {
