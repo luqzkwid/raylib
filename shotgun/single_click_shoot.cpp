@@ -28,13 +28,14 @@ typedef struct {
 Vector2 p_pos={200,200}, p_vel={5,5};
 std::vector<Enemy> EnemiesList;
 std::vector<Bullet> BulletList;
+
 // Functions Definitions
 void shoot(Gun* gun);
-// void UpdateAmmo();
 void Draw(Gun* gun, Player* px);
 void AddMovement(Player* px, Gun* gun);
 void AddEnemies();
 // void UpdateEnemies();
+// void UpdateAmmo();
 void Update();
 int main(void){
   raylib::Window window(WIDTH, HEIGHT, "Shotgun Game");
@@ -51,6 +52,7 @@ int main(void){
       Update();
       AddMovement(&p, &gun);
     EndDrawing();
+    if(IsKeyPressed(KEY_R)) {AddEnemies();}
   }
 }
 void AddEnemies(){
@@ -92,7 +94,7 @@ void Draw(Gun* gun, Player* pX) {
   DrawRectanglePro(Gun_template, CenterOfOrigin, gun->aov,  BLUE);
 }
 void shoot(Gun* gun) {
-  if(IsKeyPressed(KEY_SPACE)) {
+  if(IsKeyPressed(KEY_SPACE) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
     Bullet newBullet;
     float radians = gun->aov * (PI / 180.0f);
     float bulletSpeed = 10.0f;

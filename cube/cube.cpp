@@ -15,6 +15,7 @@ int main(void){
   SetTargetFPS(60); 
 
   ::Vector3 cube_position = Vector3{ 0.4f, 1.0f, 0.1f };
+  
  while(!window.ShouldClose()) {
     UpdateCamera(&cam, CAMERA_FREE);
     BeginDrawing();
