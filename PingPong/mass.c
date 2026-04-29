@@ -14,7 +14,6 @@ typedef struct {
 int Collision(Ball* b, Rect* rect_1, Rect* rect_2);
 void movement_logic(Rect* rect_1, Rect* rect_2, Ball* b);
 void make(Rect* rect_1, Rect* rect_2, Ball* b);
-void endgame(int rc, Ball* b);
 
 int
 main(void){
@@ -30,51 +29,72 @@ main(void){
     InitWindow(x,y, "Seeing physics");
     make(&rect_1, &rect_2, &b);
     while(!WindowShouldClose()){
-        float dt = GetFrameTime();
+        movement_logic(&rect_1, &rect_2, &b);
+
         BeginDrawing();
         ClearBackground(BLACK);
-          int text_width_rect_2 = MeasureText("Player 2", 20);
-          DrawText("Player 1", rect_1.pos.x, rect_1.pos.y - 25, 20, WHITE);
-          DrawText("Player 2", rect_2.pos.x - text_width_rect_2/2, rect_2.pos.y - 25, 20, WHITE);
-          DrawRectangleV(rect_1.pos, rect_1.s, WHITE);
-          DrawRectangleV(rect_2.pos, rect_2.s, WHITE);
-          DrawCircleV(b.center, b.radius, b.color);
-          game_over = Collision(&b, &rect_1, &rect_2);
-          if(game_over == -1){
-              b.vel = (Vector2){0,0};
-              const char* endgame_message = "", play_again_message = "Wanna play again? (Press R)";
-              int font_endgame = 50, font_playagain = 25;
+        game_over = Collision(&b, &rect_1, &rect_2);
+        if(game_over == -1){
+            b.vel = (Vector2){0,0};
+            const char* endgame_message = "";
+            const char* play_again_message = "Wanna play again? (Press R)";
+            int font_endgame = 50, font_playagain = 25;
 
-              if(b.center.x > WIDTH/2)     { endgame_message = "Player 2 Loose";}
-              else if(b.center.x < WIDTH/2){ endgame_message = "Player 1 Loose";}
+            if(b.center.x > WIDTH/2)     { endgame_message = "Player 2 Loose";}
+            else if(b.center.x < WIDTH/2){ endgame_message = "Player 1 Loose";}
 
-              int text_witdh_endgame = MeasureText(endgame_message, font_endgame);
-              int text_width_play_again = MeasureText(play_again_message, font_playagain);
+            int text_witdh_endgame = MeasureText(endgame_message, font_endgame);
+            int text_width_play_again = MeasureText(play_again_message, font_playagain);
 
-              DrawText(
-              endgame_message,
-              WIDTH/2 - text_witdh_endgame/2,
-              HEIGHT/2 - font_endgame,
-              font_endgame,
-              WHITE);
+        /* Definition of  DrawText function (raylib):
+            Drawtext(
+            const char* text,
+            int positionX,
+            int positionY,
+            int fontsize,
+            Color color
+            );
+            */
+            DrawText(
+            endgame_message,
+            WIDTH/2 - text_witdh_endgame/2,
+            HEIGHT/2 - font_endgame,
+            font_endgame,
+            WHITE
+            );
 
-              DrawText(
-              play_again_message,
-              WIDTH/2 - text_width_play_again/2,
-              HEIGHT/2,
-              font_playagain,
-              WHITE);
-              if(IsKeyPressed(KEY_R)){
-                  game_over = 0;
-              }
-          }
-          EndDrawing();
+            DrawText(
+            play_again_message,
+            WIDTH/2 - text_width_play_again/2,
+            HEIGHT/2,
+            font_playagain,
+            WHITE
+            );
+            if(IsKeyPressed(KEY_R)){
+                if(b.center.x > WIDTH/2){
+                    b.vel = (Vector2){500,500};
+                }
+                else{
+                    b.vel = (Vector2){-500,500};
+                }
+                game_over = 0;
+                b.center = (Vector2){WIDTH/2, HEIGHT/2};
+            }
+        }
+        EndDrawing();
     }
 }
+
 int
 Collision(Ball *b, Rect* rect_1, Rect* rect_2){
     float dt = GetFrameTime();
-    movement_logic(rect_1, rect_2, b);
+    DrawRectangleV(rect_1->pos, rect_1->s, WHITE);
+    DrawRectangleV(rect_2->pos, rect_2->s, WHITE);
+    DrawCircleV(b->center, b->radius, b->color);
+    int text_width_rect_2 = MeasureText("Player 2", 20);
+    DrawText("Player 1", rect_1->pos.x, rect_1->pos.y - 25, 20, WHITE);
+    DrawText("Player 2", rect_2->pos.x - text_width_rect_2/2, rect_2->pos.y - 25, 20, WHITE);
+
     // Collision ball-rect
     if(CheckCollisionCircleRec(b->center,b->radius,
     (Rectangle){rect_1->pos.x, rect_1->pos.y, rect_1->s.x, rect_1->s.y})) {
@@ -83,6 +103,7 @@ Collision(Ball *b, Rect* rect_1, Rect* rect_2){
     if(CheckCollisionCircleRec(b->center,b->radius,
     (Rectangle){rect_2->pos.x, rect_2->pos.y, rect_2->s.x, rect_2->s.y}))
     {
+
         b->vel.x *= -1.1;
     }
     // Game Over Collision
@@ -126,10 +147,4 @@ make(Rect* rect_1, Rect* rect_2, Ball* b) {
     b->center = (Vector2){WIDTH/2,HEIGHT/2};
     b->vel = (Vector2){500,500};
     b->radius = 10; b->color = YELLOW;
-}
-void endgame(int rc, Ball* b){
-    if(rc == -1) {
-        DrawText("YOU LOOSE BABY", WIDTH/2 - 50, HEIGHT/2 - 50, 50, WHITE);
-        b->vel = (Vector2){0,0};
-    }
 }
