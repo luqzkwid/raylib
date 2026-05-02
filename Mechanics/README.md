@@ -1,3 +1,3 @@
-#### Mechanics Centripetal Acceleration
+#### Centripetal Acceleration
 
-![Demo GIF](https://s3.ezgif.com/tmp/ezgif-377ad4bd18467570.mp4-poster.jpg)
+<img src="https://s3.ezgif.com/tmp/ezgif-39e3222ffd6aa42f.gif">
