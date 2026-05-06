@@ -15,22 +15,31 @@ int main(void){
     InitWindow(WIDTH, HEIGHT, "Aceleracao Centripeta");
     SetTargetFPS(60);
     while(!WindowShouldClose()){
-        
+        Vector2 mouse = GetMousePosition();
         float dt = GetFrameTime();
+        if(IsKeyPressed(KEY_R)){
+            angle -= v_a * dt;
+            angle_2 -= v_a2 * dt;
+            angle_3 -= v_a3 * dt;
+        } else if (IsKeyPressed(KEY_W)) {
+            angle += v_a * dt;
+            angle_2 += v_a2 * dt;
+            angle_3 += v_a3 * dt;
+        }
         angle += v_a * dt;
         angle_2 += v_a2 * dt;
         angle_3 += v_a3 * dt;
         Vector2 pos = {
-            center.x + cosf(angle) * 200,
-            center.y + sinf(angle) * 200
+            center.x + cosf(angle) * (radius + 50),
+            center.y + sinf(angle) * (radius + 50)
         };
         Vector2 pos_2 = {
             center.x + cosf(angle_2) * radius,
             center.y + sinf(angle_2) * radius
         };
         Vector2 pos_3 = {
-            center.x + cosf(angle_3) * 80,
-            center.y + sinf(angle_3) * 80
+            center.x + cosf(angle_3) * (radius - 70),
+            center.y + sinf(angle_3) * (radius - 70)
         };
         Vector2 direcaoCentro = Vector2Subtract(center, pos);
         Vector2 direcaoCentro_2 = Vector2Subtract(center, pos_2);
@@ -49,11 +58,15 @@ int main(void){
         Vector2 vetorVisual_2 = Vector2Scale(aceleracaoCentripeta_2, distance_2);
         Vector2 vetorVisual_3 = Vector2Scale(aceleracaoCentripeta_3, distance_3);
         
+        float distance_mouse_center = sqrtf((center.x - mouse.x)*(center.x - mouse.x) + (center.y - mouse.y)*(center.y - mouse.y));
+        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) && distance_mouse_center < radius-70) {
+            center = (Vector2){mouse.x, mouse.y};
+        }
         BeginDrawing();
         ClearBackground(BLACK);
         DrawCircleLinesV(center, radius, WHITE);
-        DrawCircleLinesV(center, 200, WHITE);
-        DrawCircleLinesV(center, 80, WHITE);
+        DrawCircleLinesV(center, radius+50, WHITE);
+        DrawCircleLinesV(center, radius-70, WHITE);
         DrawLineEx(
             pos,
             Vector2Add(pos, vetorVisual),
@@ -73,19 +86,26 @@ int main(void){
         DrawCircleV(pos, 30, BLUE);
         DrawCircleV(pos_2, 20, RED);
         DrawCircleV(pos_3, 10, GREEN);
-        DrawCircleV(center, 50, WHITE);
+        DrawCircleV(center, 30, WHITE);
         
-        const char* cos_azul = TextFormat("Cosseno(Azul): %.2f", cosf(angle));
-        const char* sin_azul = TextFormat("Sen(Azul): %.2f", sinf(angle));
+        const char* cos_azul = TextFormat("Cosseno(BLUE): %.2f", cosf(angle));
+        const char* sin_azul = TextFormat("Sen(BLUE): %.2f", sinf(angle));
         
-        const char* cos_red = TextFormat("Cosseno(Vermelho): %.2f", cosf(angle + 1.0f));
-        const char* sin_red = TextFormat("Sen(Vermelho): %.2f", sinf(angle + 1.0f));
+        const char* cos_red = TextFormat("Cosseno(RED): %.2f", cosf(angle_2));
+        const char* sin_red = TextFormat("Sen(RED): %.2f", sinf(angle_2));
         
-        DrawText(cos_azul, 20,20, 20, WHITE);
-        DrawText(sin_azul, 20,40, 20, WHITE);
+        const char* cos_green = TextFormat("Cosseno(GREEN): %.2f", cosf(angle_3));
+        const char* sin_green = TextFormat("Sen(GREEN): %.2f", sinf(angle_3));
+        
+        DrawText(sin_azul, 20,20, 20, WHITE);
+        DrawText(cos_azul, 20,50, 20, WHITE);
         
         DrawText(cos_red, 20,HEIGHT-100, 20, WHITE);
-        DrawText(sin_red, 20,HEIGHT-120, 20, WHITE);
+        DrawText(sin_red, 20,HEIGHT-130, 20, WHITE);
+        
+        DrawText(cos_green, 20,HEIGHT/2, 20, WHITE);
+        DrawText(sin_green, 20,HEIGHT/2-30, 20, WHITE);
+        
         EndDrawing();
     }
     CloseWindow();

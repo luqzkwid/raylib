@@ -79,6 +79,8 @@ main(void){
                 }
                 game_over = 0;
                 b.center = (Vector2){WIDTH/2, HEIGHT/2};
+                rect_1.pos = (Vector2){30, HEIGHT/2 - rect_1.s.y/2 };
+                rect_2.pos = (Vector2){WIDTH - 60, HEIGHT/2 - rect_2.s.y/2};
             }
         }
         EndDrawing();
@@ -103,7 +105,6 @@ Collision(Ball *b, Rect* rect_1, Rect* rect_2){
     if(CheckCollisionCircleRec(b->center,b->radius,
     (Rectangle){rect_2->pos.x, rect_2->pos.y, rect_2->s.x, rect_2->s.y}))
     {
-
         b->vel.x *= -1.1;
     }
     // Game Over Collision
@@ -134,6 +135,7 @@ movement_logic(Rect* rect_1, Rect* rect_2, Ball* b){
     b->center.x += (b->vel.x * GetFrameTime());
     b->center.y += (b->vel.y * GetFrameTime());
 }
+
 void
 make(Rect* rect_1, Rect* rect_2, Ball* b) {
     rect_1->s   = (Vector2){30, 200};
