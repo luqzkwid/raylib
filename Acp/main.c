@@ -10,7 +10,6 @@ int main(void){
     float v_a = 2.0f, v_a2 = 4.0f, v_a3 = 8.0f;
  
     float radius = 150.f;
-    
     float angle = 0, angle_2 = 0, angle_3 = 0;
     InitWindow(WIDTH, HEIGHT, "Aceleracao Centripeta");
     SetTargetFPS(60);
