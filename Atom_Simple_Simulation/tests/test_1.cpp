@@ -1,7 +1,27 @@
 #include <iostream>
 #include <map>
-using namespace std;
+#include <vector>
 #define MAX_LAYERS 7
+
+using namespace std;
+
+map<string, vector<int>>
+diagnostic_layers(map<int, int> layers, int electrons) {
+    map<string, vector<int>>lmap;
+    lmap["completed_layers"];
+    lmap["incompleted_layers"];
+    for(auto& [level, max_electrons] : layers){
+        if(electrons - max_electrons >= 0){
+            // Here we have a completed layer!
+            electrons -= max_electrons;
+            lmap["completed_layers"].push_back(level);
+        } else {
+            lmap["incompleted_layers"].push_back(level);
+            break;
+        }
+    }
+    return lmap;
+}
 void print_map(map<int, int>m, int electrons){
     cout << "Layers - CapMaxElectrons\n";
     for(auto& [k, v] : m) {
@@ -21,7 +41,7 @@ void print_map(map<int, int>m, int electrons){
 }
 int
 main(void){
-    int electrons = 10;
+    int electrons = 100;
     map<int, int> m{{1, 2},{2, 8},{3, 18},{4, 32},{5, 32},{6, 18},{7, 8}};
     print_map(m,electrons);
     return 0;
