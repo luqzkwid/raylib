@@ -73,17 +73,28 @@ public:
     }
     void draw(){
         float k = 40;
-        DrawCircleV(this->center, this->radius, YELLOW);
+        DrawCircleV(this->center, this->radius, GREEN);
         for(int i=1; i <= layers_diagnostic["completed_layers"].size(); i++) {
             int electrons_count = this->layers[i];
-            float space_eletron = 20;
+            float space_electron = 20.0f;
+            DrawCircleLinesV(this->center, this->radius+k, RAYWHITE);
+            for(int j=1; j <= electrons_count; j++){
+                Vector2 pos = {
+                    this->center.x + cosf(this->angle + space_electron) * (this->radius+k),
+                    this->center.y + sinf(this->angle + space_electron) * (this->radius+k)
+                };
+                DrawCircleV(pos, 8, BLUE);
+                space_electron +=10;
+            }
+            this->angle += this->v_a * GetFrameTime();
+            k+=40;
         }
     }
 };
 int
 main(void){
     Vector2 center = {WIDTH/2,HEIGHT/2};
-    Atom atom_test = Atom{35, 20, center};
+    Atom atom_test = Atom{100, 30, center};
     SetTargetFPS(60);
     InitWindow(WIDTH, HEIGHT, "Atom Simulations");
     while(!WindowShouldClose()){
@@ -91,7 +102,7 @@ main(void){
         if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){atom_test.center = GetMousePosition();}
         BeginDrawing();
         ClearBackground(BLACK);
-        atom_test.draw();
+        	atom_test.draw();
         EndDrawing();
     }
     return 0;
