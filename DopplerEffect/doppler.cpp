@@ -7,7 +7,7 @@ using std::vector;
 
 #define WIDTH  1000
 #define HEIGHT 650
-#define MAX_WAVES 100
+#define MAX_WAVES 56
 #define WAVE_VEL 1.0f
 #define WAVE_FREQUENCY 0.2f
 #define BODY_VEL 50.0f
@@ -26,6 +26,22 @@ private:
     Colors body_colors;
     float vel;
     float interval = 0;
+    void create_waves(){
+        if(this->waves.size() >= MAX_WAVES){
+            print("Max waves reached!!\n");
+            this->waves.erase(std::remove_if(
+                    this->waves.begin(),
+                    this->waves.end(),
+                    [](const SoundWave &w){
+                        print("Cleaning the waves that gone...");
+                        return w.radius >= HEIGHT + 50.0f;}));
+        /* Lambda that returns if the wave gets (w.radius >= HEIGHT+ 50) */
+        }
+        SoundWave new_wave = { this->position, 100.0f, 0 };
+        this->waves.push_back(new_wave);
+        print("Wave added. Count: {}.\n", this->waves.size());
+    } //CREATE_WAVES}
+
 public:
     float radius;
     vector<SoundWave> waves;
@@ -37,23 +53,6 @@ public:
         this->body_colors.secondary = colors.secondary;
     }; //CONSTRUCTOR
 
-    void create_waves(){
-        vector<SoundWave> wav = this->waves;
-        if(wav.size() >= MAX_WAVES){
-            print("Max waves reached!!\n");
-            print("Cleaning the waves that gone.");
-            for(int i=0; i < wav.size(); ++i){
-                if(wav.at(i).radius >= HEIGHT + 50){
-                    wav.erase(
-                        wav.begin() + (i - (wav.size() / 2)),
-                        wav.begin() + i);
-                }
-            } // Erasing the half of the current elements count
-        };
-        SoundWave new_wave = { this->position, 100.0f, 0 };
-        this->waves.push_back(new_wave);
-        print("Wave added. Count: {}.\n", this->waves.size());
-    } //CREATE_WAVES}
 
     void draw(){
         // TODO(12:34): Do some interval to separate the waves
